@@ -6,29 +6,45 @@ machine:
   xcode:
     version: "7.0"
 
+dependencies:
+  override:
+    # avoid Xcode bug when use Carthage. See: http://qiita.com/morizotter/items/552c2ef7e1652ad6fac6
+    # - sudo chown :wheel /Library/Developer/CoreSimulator/Profiles/Runtimes/iOS\ *.simruntime/Contents/Resources/RuntimeRoot/usr/lib/dyld_sim
+    # required AppleID (see:https://github.com/Carthage/Carthage/issues/235)
+    # - carthage update --platform iOS --verbose
+    # - bundle install
+    # - bundle exec pod setup
+    # - bundle exec pod install
+  pre:
+    - sudo gem install cocoapods --pre
+    # CocoaPods sometimes has issues using caches
+    # between different versions of CocoaPods.
+    - pod setup
+    - pod install
+
 test:
   override:
-    - xctool
-      -reporter pretty
-      -reporter junit:$CIRCLE_TEST_REPORTS/xcode/results.xml
-      -reporter plain:$CIRCLE_ARTIFACTS/xctool.log
-      CODE_SIGNING_REQUIRED=NO
-      CODE_SIGN_IDENTITY=
-      PROVISIONING_PROFILE=
-      -destination 'platform=iOS Simulator,name=iPhone 6,OS=latest'
-      -sdk iphonesimulator
-      -workspace "$XCODE_WORKSPACE"
-      -scheme "$XCODE_SCHEME"
-      build build-tests run-tests
-
-  #  - set -o pipefail &&
-  #    xcodebuild
-  #      CODE_SIGNING_REQUIRED=NO
-  #      CODE_SIGN_IDENTITY=
-  #      PROVISIONING_PROFILE=
-  #      -sdk iphonesimulator
-  #      -scheme 
-  #      -workspace "$XCODE_WORKSPACE"
-  #      clean build test |
-  #    tee $CIRCLE_ARTIFACTS/xcode_raw.log |
-  #    xcpretty -c --report junit --output $CIRCLE_TEST_REPORTS/xcode/result.xml
+  #  - xctool
+  #    -reporter pretty
+  #    -reporter junit:$CIRCLE_TEST_REPORTS/xcode/results.xml
+  #    -reporter plain:$CIRCLE_ARTIFACTS/xctool.log
+  #    CODE_SIGNING_REQUIRED=NO
+  #    CODE_SIGN_IDENTITY=
+  #    PROVISIONING_PROFILE=
+  #    -destination 'platform=iOS Simulator,name=iPhone 6,OS=latest'
+  #    -sdk iphonesimulator
+  #    -workspace "$XCODE_WORKSPACE"
+  #    -scheme "$XCODE_SCHEME"
+  #    build build-tests run-tests
+  #
+    - set -o pipefail &&
+      xcodebuild
+        CODE_SIGNING_REQUIRED=NO
+        CODE_SIGN_IDENTITY=
+        PROVISIONING_PROFILE=
+        -sdk iphonesimulator
+        -scheme 
+        -workspace "$XCODE_WORKSPACE"
+        clean build test |
+      tee $CIRCLE_ARTIFACTS/xcode_raw.log |
+      xcpretty -c --report junit --output $CIRCLE_TEST_REPORTS/xcode/result.xml
