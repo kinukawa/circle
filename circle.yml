@@ -43,7 +43,7 @@ test:
         CODE_SIGN_IDENTITY=
         PROVISIONING_PROFILE=
         -sdk iphonesimulator
-        -scheme 
+        -scheme  "$XCODE_SCHEME"
         -workspace "$XCODE_WORKSPACE"
         clean build test |
       tee $CIRCLE_ARTIFACTS/xcode_raw.log |
